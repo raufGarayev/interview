@@ -1,141 +1,221 @@
-import React, {useState} from 'react';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import React, {useState, useRef, useEffect} from 'react'
+import {AiOutlineClose} from 'react-icons/ai'
+import {FiCheck} from 'react-icons/fi'
+import {BsChatDots} from 'react-icons/bs'
+import Datetime from 'react-datetime';
+import './MailForm.sass'
+import "react-datetime/css/react-datetime.css";
 
-const validationSchema = Yup.object().shape({
-  thread: Yup.string().required('Thread name is required'),
-  sender: Yup.string().required('Sender is required'),
-  to: Yup.array().of(Yup.string().email("Invalid email format")).required("At least one recipient is required"),
-  startDate: Yup.date().required('Start date is required'),
-  customerName: Yup.string().required('Customer name is required'),
-  subject: Yup.string().required('Subject is required'),
-});
+const customers = [
+  {
+    name: "Rauf Garayev",
+    email: "rauf@mail.com"
+  },
+  {
+    name: "Adam Adams",
+    email: "adam@mail.com"
+  }
+]
 
-const initialValues = {
-  thread: '',
-  sender: 'John Doe',
-  to: [],
-  startDate: null,
-  customerName: '',
-  subject: '',
-  message: '',
-};
+const MailForm = () => {
+  const dropdownRef = useRef(null);
+  const [receivers, setReceivers] = useState([])
+  const [inputValues, setInputValues] = useState([])
+  const [recValue, setRecValue] = useState('')
+  const [toggleDrop, setToggleDrop] = useState(false)
+  const [content, setContent] = useState('')
+  const [date, setDate] = useState(new Date())
 
-const TemplateSelect = ({ field }) => (
-  <select {...field}>
-    <option value="">Select a template</option>
-    <option value="template1">Template 1</option>
-    <option value="template2">Template 2</option>
-    <option value="template3">Template 3</option>
-  </select>
-);
+  function onChange(newDate) {
+    setDate(newDate);
+  }
 
-const SenderInput = ({ field, form }) => (
-  <input type="text" {...field} disabled={true} value={form.initialValues.sender} />
-);
+  const cus = () => {
+    return customers.map(c => {
+      const hasEmail = inputValues.some(iv => iv.email === c.email);
+      return (
+        <span onClick={() => setInputValues([...inputValues, {name: c.name, email: c.email}])}>
+          {c.name}:{c.email}
+          {hasEmail && <small><FiCheck /></small>}
+        </span>
+      )
+    })
+  }
+  
 
+  const rec = () => {
+    return receivers.map(c => (
+      <span>{c.name}:{c.email} <small><FiCheck /></small></span>
+    ))
+  }
 
+  const recInput = () => {
+    return inputValues.map((r, index) => (
+      <div className='test'>
+        <p>{r.name}:{r.email}</p> 
+        <AiOutlineClose className='del-icon' onClick={() => handleDelInput(index)} />
+      </div>
+    ));
+  }
+  
+  const emailCount = _ => {
+    let con = Math.ceil(content.length / 156)
+    return con
+  }
+  
 
-const CustomDatePicker = ({ field, form }) => (
-  <DatePicker
-    selected={field.value}
-    onChange={(date) => form.setFieldValue(field.name, date)}
-    minDate={new Date()}
-    {...field}
-  />
-);
+  function handleInputChange(event) {
+    setRecValue(event.target.value);
+  }
 
-
-
-const EmailForm = () => {
-  const [tags, setTags] = useState([]);
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && e.target.value) {
-      const newTag = e.target.value.trim();
-      if (tags.indexOf(newTag) === -1) {
-        setTags([...tags, newTag]);
+  function handleInputKeyDown(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const emailExists = customers.some(customer => customer.email === recValue);
+      if (!emailExists) {
+        setReceivers([...receivers, {name: "Not customer", email: recValue}]);
+        setInputValues([...inputValues, {name: "Not customer", email: recValue}])
       }
-      e.target.value = "";
-    } else if (e.key === "Backspace" && !e.target.value) {
-      setTags(tags.slice(0, -1));
+      setRecValue('');
+    } else if (event.key === "Backspace") {
+      setReceivers(receivers.slice(0, receivers.length - 1));
+      setInputValues(inputValues.slice(0, inputValues.length - 1));
+    }
+  }
+
+  const handleDelInput = (index) => {
+    let updatedInputValues = [...inputValues];
+    updatedInputValues.splice(index, 1);
+    setInputValues(updatedInputValues);
+    updatedInputValues = [...receivers]
+    updatedInputValues.splice(index, 1)
+    setReceivers(updatedInputValues)
+    
+  }
+  
+
+  const showDrp = () => {
+    setToggleDrop(!toggleDrop)
+  }
+
+  const addAllCustomers = () => {
+    const emails = inputValues.map(iv => iv.email);
+    const newCustomers = customers.filter(c => !emails.includes(c.email));
+    setInputValues([...inputValues, ...newCustomers]);
+  }
+  
+  
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [toggleDrop]);
+
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target) && toggleDrop) {
+      setToggleDrop(false);
     }
   };
+
   return (
-    <Formik
-    initialValues={initialValues}
-    validationSchema={validationSchema}
-    onSubmit={(values, { setSubmitting }) => {
-      console.log(values);
-      setSubmitting(false);
-    }}
-  >
-    {({ isSubmitting, errors, touched }) => (
-      <Form className='form'>
-        <div className='form-top'>
+    <div className='mail-form'>
+      <div className="mail-form-main">
+        <p>Email thread</p>
+        <div className="hr"></div>
+        <form>
+          <div className="mail-form-main-top">
             <div>
-                <label htmlFor="thread">Thread name</label>
-                <Field type="text" name="thread" />
-                {errors.thread && touched.thread && <div>{errors.thread}</div>}
+              <label htmlFor="tname">Thread name</label>
+              <input type="text" name="tname" />
             </div>
-
             <div>
-                <label htmlFor="template">Template:</label>
-                <Field name="template" component={TemplateSelect} />
+              <label htmlFor="template">Template</label>
+              <select name="template">
+                <option value="">Select feedback template</option>
+                <option value="template1">Template1</option>
+              </select>
             </div>
-        </div>
-
-        <div className="form-sender-receiver">
+          </div>
+          <div className="mail-form-main-client">
             <div>
-                <label htmlFor="sender">From</label>
-                <Field name="sender" component={SenderInput} />
-                {errors.sender && touched.sender && <div>{errors.sender}</div>}
+              <label htmlFor="from">From</label>
+              <input type="text" name="from" disabled value="Qmeter" />
             </div>
-            <div className='form-receiver'>
+            <div id='receiver'>
               <label htmlFor="to">To</label>
-              <Field type="text" name="to" />
-              {errors.to && touched.to && <div>{errors.to}</div>}
-              <div className="form-receiver">
-                <button>Choose all</button>
-                <span>Customers</span>
-                <div className="form-receiver-customers"></div>
-                <span>Receivers</span>
-                <div className="form-receiver-receivers"></div>
+              <div onClick={showDrp} className='to-container' ref={dropdownRef}>
+                {recInput()}
+                <input 
+                  id='to' 
+                  type="text" 
+                  name="to" 
+                  value={recValue}
+                  onChange={handleInputChange}
+                  onKeyDown={handleInputKeyDown} />
+              </div>
+              <div className={toggleDrop ? "dropdown activedrp" : "dropdown"} ref={dropdownRef} >
+                <span onClick={addAllCustomers} className='all'>Choose all</span>
+                <span id="customers">Customers</span>
+                <div className="customers">{cus()}</div>
+                <span id='receivers'>Receivers</span>
+                <div className="receivers">{rec()}</div>
               </div>
             </div>
-        </div>
-        <div className="form-customer-date">
-            <div>
-                <label htmlFor="customerName">If Customer name is empty</label>
-                <Field type="text" name="customerName" />
-                {errors.customerName && touched.customerName && <div>{errors.customerName}</div>}
+          </div>
+          <div className="mail-form-main-mid">
+            <div className='cus-name'>
+              <label htmlFor="cname">If Customer name is empty</label>
+              <input type="text" name="cname" />
             </div>
-            <div>
-                <label htmlFor="startDate">Start Sending</label>
-                <Field name="startDate" component={CustomDatePicker} />
-                {errors.startDate && touched.startDate && <div>{errors.startDate}</div>}
+            <div className='date'>
+              <label htmlFor="cname">Date</label>
+              <Datetime
+                value={date}
+                onChange={(value) => setDate(value)}
+                input
+                dateFormat="DD-MM-YYYY"
+                timeFormat="HH-mm"
+                locale='en'
+              />
             </div>
+          </div>
+          <div className="mail-form-main-subject">
+            <div>
+              <label htmlFor="subject">Subject</label>
+              <input type="text" name="subject" />
+            </div>
+          </div>
+          <div className="hr"></div>
+          <div className="mail-form-main-textarea">
+            <label htmlFor="message">Content</label>
+            <textarea name="message" cols="30" rows="10" value={content} onChange={(e) => setContent(e.target.value)}></textarea>
+          </div>
+          <div className="hrl"></div>
+          <button id='submit' type="submit">Send</button>
+        </form>
+      </div>
+      <div className="mail-form-stats">
+        <div className="mail-form-stats-head">
+          <p>Sending Info</p>
         </div>
-
-        <div className='form-subject'>
-            <label htmlFor="subject">Subject</label>
-            <Field type="text" name="subject" />
-            {errors.subject && touched.subject && <div>{errors.subject}</div>}
+        <span><BsChatDots className='send-icon' /></span>
+        <span className='email-count'>{emailCount()}</span>
+        <p>Total email count</p>
+        <div className="mail-form-stats-main">
+          <div className="mail-form-stats-main-customers">
+            <span>Customer count</span>
+            <span>{inputValues.length}</span>
+          </div>
+          <div className="mail-form-stats-main-feedback">
+            <span>Feedback balance</span>
+            <span>9985</span>
+          </div>
         </div>
-
-        <div className='form-message'>
-            <label htmlFor="message">Message:</label>
-            <Field component="textarea" name="message" />
-        </div>
-
-        <button type="submit" id='submit' disabled={isSubmitting}>
-            Submit
-        </button>
-    </Form>
-    )}
-    </Formik>
+      </div>
+    </div>
   )
 }
 
-export default EmailForm;
+export default MailForm
