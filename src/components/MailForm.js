@@ -24,7 +24,7 @@ const MailForm = () => {
   const [recValue, setRecValue] = useState('')
   const [toggleDrop, setToggleDrop] = useState(false)
   const [content, setContent] = useState('')
-  const [date, setDate] = useState(new Date())
+  const [date, setDate] = useState('Select date')
 
   function onChange(newDate) {
     setDate(newDate);
@@ -77,7 +77,7 @@ const MailForm = () => {
         setInputValues([...inputValues, {name: "Not customer", email: recValue}])
       }
       setRecValue('');
-    } else if (event.key === "Backspace") {
+    } else if (event.key === "Backspace" && recValue !== '') {
       setReceivers(receivers.slice(0, receivers.length - 1));
       setInputValues(inputValues.slice(0, inputValues.length - 1));
     }
@@ -170,7 +170,7 @@ const MailForm = () => {
               <input type="text" name="cname" />
             </div>
             <div className='date'>
-              <label htmlFor="cname">Date</label>
+              <label htmlFor="cname">Start sending</label>
               <Datetime
                 value={date}
                 onChange={(value) => setDate(value)}
