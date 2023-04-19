@@ -26,13 +26,13 @@
                     border: 1px solid #cfcccc
                     border-radius: 5px
                     overflow-x: scroll
-                    &:focus
-                        outline: 1px solid teal
+                    margin-top: 5px  
                     #to
                         flex: 1
                         border: 0
                         outline: none
                         width: auto
+                        margin: 0
                     .test
                         flex: none
                         width: auto
@@ -45,7 +45,7 @@
                         align-items: center
                         gap: 20px
                         flex-direction: row
-                        height: 30px
+                        height: 25px
                         font-size: 14px
                         position: relative
                         color: #7a7b7e
@@ -59,6 +59,7 @@
                 color: #fff
                 font-size: 1rem
                 margin-left: auto
+                cursor: pointer
             label
                 font-weight: 500
                 font-size: 14px
@@ -68,9 +69,12 @@
                 outline: none
                 border-radius: 5px
                 border: 1px solid #cfcccc
-
                 &:focus
-                    outline: 1px solid teal
+                    outline: 1px solid #a6d6ff
+                    border: 1px solid #a6d6ff
+            select
+                -webkit-appearance: none
+                appearance: none
             textarea
                 margin-top: 5px
                 padding: 10px
@@ -78,8 +82,8 @@
                 border-radius: 5px
                 border: 1px solid #cfcccc
                 &:focus
-                    outline: 1px solid teal
-                    border: 1px solid teal
+                    outline: 1px solid #a6d6ff
+                    border: 1px solid #a6d6ff
 
         &-top, &-client
             width: 100%
@@ -90,6 +94,17 @@
                 display: flex
                 flex-direction: column
                 width: 49%
+            .select-wrapper
+                width: 100%
+                position: relative
+                &::after
+                    content: "▾"
+                    font-size: 1.5rem
+                    top: 50%
+                    transform: translateY(-50%)
+                    right: 10px
+                    position: absolute
+                    color: #cfcccc
         &-mid
             width: 100%
             display: flex
@@ -157,7 +172,7 @@
 .hrl
     margin: 20px
 
-.dropdown
+.mydropdown
     z-index: 1
     display: none !important
     position: absolute
@@ -180,7 +195,7 @@
                 font-size: 1rem
     .all
         background: none
-        color: #000
+        color: #272626
         font-weight: 600
         padding: 10px 0 0 5px
     #customers, #receivers
@@ -190,6 +205,10 @@
 
 .activedrp
     display: flex !important
+
+.blur
+    outline: 1px solid #a6d6ff
+    border: 1px solid #a6d6ff
 
 ::-webkit-scrollbar 
   display: none

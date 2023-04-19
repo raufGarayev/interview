@@ -5,6 +5,12 @@ import {BsChatDots} from 'react-icons/bs'
 import Datetime from 'react-datetime';
 import './MailForm.sass'
 import "react-datetime/css/react-datetime.css";
+import ModalWindow from './Modal';
+import { useDispatch, useSelector } from 'react-redux';
+import { openModal } from '../redux/slices/modalSlice';
+import { saveMail } from '../redux/slices/mailsSlice';
+import { values } from 'lodash';
+
 
 const customers = [
   {
@@ -18,17 +24,22 @@ const customers = [
 ]
 
 const MailForm = () => {
+  const mail = useSelector(state => state.mail)
+  const dispatch = useDispatch()
   const dropdownRef = useRef(null);
   const [receivers, setReceivers] = useState([])
   const [inputValues, setInputValues] = useState([])
-  const [recValue, setRecValue] = useState('')
   const [toggleDrop, setToggleDrop] = useState(false)
-  const [content, setContent] = useState('')
-  const [date, setDate] = useState('Select date')
-
-  function onChange(newDate) {
-    setDate(newDate);
-  }
+  const [formValues, setFormValues] = useState({
+    tname: '',
+    template: '',
+    from: 'Qmeter',
+    to: inputValues,
+    cname: '',
+    date: 'Select date',
+    subject: '',
+    content: ''
+  })
 
   const cus = () => {
     return customers.map(c => {
@@ -59,25 +70,33 @@ const MailForm = () => {
   }
   
   const emailCount = _ => {
-    let con = Math.ceil(content.length / 156)
+    let con = Math.ceil([formValues.content].length / 156)
     return con
   }
   
 
-  function handleInputChange(event) {
-    setRecValue(event.target.value);
+  /* function handleInputChange(event) {
+    setFormValues({...values, to: event.target.value})
+  } */
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
   }
 
   function handleInputKeyDown(event) {
     if (event.key === 'Enter') {
       event.preventDefault();
-      const emailExists = customers.some(customer => customer.email === recValue);
+      const emailExists = customers.some(customer => customer.email === formValues.to);
       if (!emailExists) {
-        setReceivers([...receivers, {name: "Not customer", email: recValue}]);
-        setInputValues([...inputValues, {name: "Not customer", email: recValue}])
+        setReceivers([...receivers, {name: "Not customer", email: formValues.to}]);
+        setInputValues([...inputValues, {name: "Not customer", email: formValues.to}])
       }
-      setRecValue('');
-    } else if (event.key === "Backspace" && recValue !== '') {
+      setFormValues({...values, to: ''})
+    } else if (event.key === "Backspace" && formValues.to === '') {
       setReceivers(receivers.slice(0, receivers.length - 1));
       setInputValues(inputValues.slice(0, inputValues.length - 1));
     }
@@ -90,7 +109,6 @@ const MailForm = () => {
     updatedInputValues = [...receivers]
     updatedInputValues.splice(index, 1)
     setReceivers(updatedInputValues)
-    
   }
   
 
@@ -119,43 +137,61 @@ const MailForm = () => {
     }
   };
 
+  const handleSubmit = e => {
+    e.preventDefault()
+    dispatch(openModal())
+    dispatch(saveMail({
+      name: formValues.tname,
+      template: formValues.template,
+      to: inputValues,
+      date: formValues.date._d,
+      subject: formValues.subject,
+      content: formValues.content,
+    }))
+
+    console.log(mail)
+  }
+
   return (
     <div className='mail-form'>
       <div className="mail-form-main">
         <p>Email thread</p>
         <div className="hr"></div>
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="mail-form-main-top">
             <div>
               <label htmlFor="tname">Thread name</label>
-              <input type="text" name="tname" />
+              <input type="text" name="tname" value={formValues.tname} onChange={handleInputChange} />
             </div>
             <div>
               <label htmlFor="template">Template</label>
-              <select name="template">
-                <option value="">Select feedback template</option>
-                <option value="template1">Template1</option>
-              </select>
+              <div className="select-wrapper">
+                <select name="template">
+                  <option value="">Select feedback template</option>
+                  <option value="template1">Template1</option>
+                </select>
+              </div>
+              
             </div>
           </div>
           <div className="mail-form-main-client">
             <div>
               <label htmlFor="from">From</label>
-              <input type="text" name="from" disabled value="Qmeter" />
+              <input type="text" name="from" disabled value={formValues.from} onChange={handleInputChange} />
             </div>
             <div id='receiver'>
               <label htmlFor="to">To</label>
-              <div onClick={showDrp} className='to-container' ref={dropdownRef}>
+              <div onClick={showDrp} className={toggleDrop ? 'to-container blur' : 'to-container'} ref={dropdownRef}>
                 {recInput()}
                 <input 
                   id='to' 
                   type="text" 
                   name="to" 
-                  value={recValue}
+                  value={formValues.to}
                   onChange={handleInputChange}
                   onKeyDown={handleInputKeyDown} />
               </div>
-              <div className={toggleDrop ? "dropdown activedrp" : "dropdown"} ref={dropdownRef} >
+              <div className={toggleDrop ? "mydropdown activedrp" : "mydropdown"} ref={dropdownRef} >
                 <span onClick={addAllCustomers} className='all'>Choose all</span>
                 <span id="customers">Customers</span>
                 <div className="customers">{cus()}</div>
@@ -167,30 +203,33 @@ const MailForm = () => {
           <div className="mail-form-main-mid">
             <div className='cus-name'>
               <label htmlFor="cname">If Customer name is empty</label>
-              <input type="text" name="cname" />
+              <input type="text" name="cname" value={formValues.cname} onChange={handleInputChange} />
             </div>
             <div className='date'>
-              <label htmlFor="cname">Start sending</label>
+              <label htmlFor="date">Start sending</label>
               <Datetime
-                value={date}
-                onChange={(value) => setDate(value)}
+                value={formValues.date}
+                name="date"
+                onChange={(value) => setFormValues({...formValues, date: value})}
                 input
                 dateFormat="DD-MM-YYYY"
-                timeFormat="HH-mm"
+                timeFormat="HH:mm"
                 locale='en'
+                closeOnSelect
+                inputProps={{name: 'date'}}
               />
             </div>
           </div>
           <div className="mail-form-main-subject">
             <div>
               <label htmlFor="subject">Subject</label>
-              <input type="text" name="subject" />
+              <input type="text" name="subject" value={formValues.subject} onChange={handleInputChange} />
             </div>
           </div>
           <div className="hr"></div>
           <div className="mail-form-main-textarea">
-            <label htmlFor="message">Content</label>
-            <textarea name="message" cols="30" rows="10" value={content} onChange={(e) => setContent(e.target.value)}></textarea>
+            <label htmlFor="content">Content</label>
+            <textarea name="content" cols="30" rows="10" value={formValues.content} onChange={handleInputChange}></textarea>
           </div>
           <div className="hrl"></div>
           <button id='submit' type="submit">Send</button>
@@ -214,6 +253,7 @@ const MailForm = () => {
           </div>
         </div>
       </div>
+      <ModalWindow />
     </div>
   )
 }
