@@ -213,7 +213,6 @@ const MailForm = () => {
 
   return (
     <div className='mail-form'>
-      <Link to='/'>Back</Link>
       <div className="mail-form-main">
         <p>Email thread</p>
         <div className="hr"></div>

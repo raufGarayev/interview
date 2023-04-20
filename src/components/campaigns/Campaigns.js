@@ -40,10 +40,6 @@ const Campaigns = () => {
         }))
     }
 
-    const handleNewMail = _ => {
-        dispatch(clearMail())
-    }
-
     let timer
     const handleSearch = e => {
         clearTimeout(timer)
@@ -73,17 +69,6 @@ const Campaigns = () => {
 
   return (
     <section className='campaigns'>
-        <header>
-            <nav>
-                <div className="campaigns-nav-head">
-                    <h1>Campaigns</h1>
-                    <p>You can communicate with your customers directly from this section</p>
-                </div>
-                <div className="campaigns-nav-nthread">
-                    <Link to={'/mail/0'}><Button onClick={handleNewMail} variant='success'>New Thread</Button></Link>
-                </div>
-            </nav>
-        </header>
         <div className="campaigns-main">
             <div className="campaigns-main-top">
                 <div className="campaigns-main-top-inner">
