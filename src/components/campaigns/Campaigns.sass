@@ -4,4 +4,47 @@
         nav
             display: flex
             justify-content: space-between
+            align-items: center
             padding: 20px 40px
+    &-main
+        background: #fff
+        margin: 1%
+        border-radius: 5px
+        padding: 1% 3%
+        &-top
+            display: flex
+            justify-content: flex-end
+            &-inner
+                position: relative
+                .search-icon
+                    position: absolute
+                    left: 5px
+                    top: 50%
+                    transform: translateY(-50%)
+                    font-size: 1.2rem
+                input
+                    padding: 10px 35px
+                    width: 300px
+                    border: 1px solid #cfcccc
+                    outline: none
+                    font-size: 1rem
+                
+        &-list
+            margin-top: 1%
+            td
+                padding: 30px .5rem !important
+                &:nth-child(5n)
+                    display: flex
+                    justify-content: center
+                    gap: 10px
+                &:nth-child(4n)
+                    text-align: center
+                
+            th
+                &:nth-child(5n)
+                    display: grid
+                    place-items: center
+                &:nth-child(4n)
+                    text-align: center
+                
+                    

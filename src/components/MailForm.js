@@ -7,9 +7,10 @@ import './MailForm.sass'
 import "react-datetime/css/react-datetime.css";
 import ModalWindow from './Modal';
 import { useDispatch, useSelector } from 'react-redux';
-import { openModal } from '../redux/slices/modalSlice';
+import { openModal, closeModal } from '../redux/slices/modalSlice';
 import { saveMail } from '../redux/slices/mailsSlice';
-import { values } from 'lodash';
+import {Link, useNavigate} from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid';
 
 
 const customers = [
@@ -24,21 +25,23 @@ const customers = [
 ]
 
 const MailForm = () => {
+  const navigate = useNavigate()
   const mail = useSelector(state => state.mail)
   const dispatch = useDispatch()
   const dropdownRef = useRef(null);
   const [receivers, setReceivers] = useState([])
-  const [inputValues, setInputValues] = useState([])
+  const [inputValues, setInputValues] = useState(mail.receivers)
   const [toggleDrop, setToggleDrop] = useState(false)
   const [formValues, setFormValues] = useState({
-    tname: '',
-    template: '',
-    from: 'Qmeter',
-    to: inputValues,
-    cname: '',
-    date: 'Select date',
-    subject: '',
-    content: ''
+    id: mail.id,
+    tname: mail.name,
+    template: mail.template,
+    from: mail.from,
+    to: mail.to,
+    cname: mail.cname,
+    date: mail.date,
+    subject: mail.subject,
+    content: mail.content,
   })
 
   const cus = () => {
@@ -70,14 +73,15 @@ const MailForm = () => {
   }
   
   const emailCount = _ => {
-    let con = Math.ceil([formValues.content].length / 156)
+    let con
+    if(formValues.content !== '') {
+      con = Math.ceil([formValues.content].length / 156)
+    }
+    else {
+      con = 0
+    }
     return con
   }
-  
-
-  /* function handleInputChange(event) {
-    setFormValues({...values, to: event.target.value})
-  } */
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -85,6 +89,13 @@ const MailForm = () => {
       ...prevState,
       [name]: value
     }));
+  }
+
+  const handleDateChange = (e) => {
+    console.log(e._d)
+    setFormValues((prevState) => ({
+      ...prevState,
+      date: e._d}))
   }
 
   function handleInputKeyDown(event) {
@@ -95,7 +106,7 @@ const MailForm = () => {
         setReceivers([...receivers, {name: "Not customer", email: formValues.to}]);
         setInputValues([...inputValues, {name: "Not customer", email: formValues.to}])
       }
-      setFormValues({...values, to: ''})
+      setFormValues({...formValues, to: ''})
     } else if (event.key === "Backspace" && formValues.to === '') {
       setReceivers(receivers.slice(0, receivers.length - 1));
       setInputValues(inputValues.slice(0, inputValues.length - 1));
@@ -141,19 +152,68 @@ const MailForm = () => {
     e.preventDefault()
     dispatch(openModal())
     dispatch(saveMail({
+      ...mail,
+      id: formValues.id || uuidv4(),
       name: formValues.tname,
       template: formValues.template,
-      to: inputValues,
-      date: formValues.date._d,
+      cname: formValues.cname,
+      receivers: inputValues,
+      date: formValues.date,
       subject: formValues.subject,
       content: formValues.content,
     }))
-
-    console.log(mail)
   }
+
+  const handleSend = () => {
+    dispatch(closeModal())
+    saveToDB(true);
+    navigate('/')
+  };
+
+  const handleCancel = () => {
+    dispatch(closeModal())
+    saveToDB(false)
+  }
+  
+  const saveToDB = (prop) => {
+    const emails = JSON.parse(localStorage.getItem('mails')) || [];
+    const index = emails.findIndex((item) => item.id === mail.id);
+    const updatedEmails = [...emails];
+    
+    if (index === -1) {
+      updatedEmails.push({
+        id: mail.id,
+        name: mail.name,
+        template: mail.template,
+        from: mail.from,
+        receivers: mail.receivers,
+        cname: mail.cname,
+        date: mail.date,
+        subject: mail.subject,
+        content: mail.content,
+        sent: prop
+      });
+    } else {
+      updatedEmails[index] = {
+        ...updatedEmails[index],
+        name: mail.name,
+        template: mail.template,
+        from: mail.from,
+        receivers: mail.receivers,
+        cname: mail.cname,
+        date: mail.date,
+        subject: mail.subject,
+        content: mail.content,
+        sent: prop
+      };
+    }
+    
+    localStorage.setItem('mails', JSON.stringify(updatedEmails));
+  };
 
   return (
     <div className='mail-form'>
+      <Link to='/'>Back</Link>
       <div className="mail-form-main">
         <p>Email thread</p>
         <div className="hr"></div>
@@ -166,7 +226,7 @@ const MailForm = () => {
             <div>
               <label htmlFor="template">Template</label>
               <div className="select-wrapper">
-                <select name="template">
+                <select name="template" value={formValues.template} onChange={handleInputChange}>
                   <option value="">Select feedback template</option>
                   <option value="template1">Template1</option>
                 </select>
@@ -209,8 +269,7 @@ const MailForm = () => {
               <label htmlFor="date">Start sending</label>
               <Datetime
                 value={formValues.date}
-                name="date"
-                onChange={(value) => setFormValues({...formValues, date: value})}
+                onChange={(value) => handleDateChange(value)}
                 input
                 dateFormat="DD-MM-YYYY"
                 timeFormat="HH:mm"
@@ -253,7 +312,7 @@ const MailForm = () => {
           </div>
         </div>
       </div>
-      <ModalWindow />
+      <ModalWindow message="Are you sure you want to send this email?" confirm={handleSend} cancel={handleCancel} confirmButton="Send" cancelButton="Cancel" />
     </div>
   )
 }

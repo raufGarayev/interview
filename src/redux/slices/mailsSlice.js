@@ -3,26 +3,50 @@ import { createSlice } from "@reduxjs/toolkit";
 export const mailsSlice = createSlice({
     name: 'mail',
     initialState: {
+        id: null,
         name: '',
         template: '',
-        to: [],
-        date: '',
+        from: 'Qmeter',
+        receivers: [],
+        cname: '',
+        date: 'Select date',
         subject: '',
         content: '',
         sent: false
     },
     reducers : {
         saveMail: (state, action) => {
-            state.name = action.payload.name;
-            state.template = action.payload.template;
-            state.to = action.payload.to;
-            state.date = action.payload.date;
-            state.subject = action.payload.subject;
-            state.content = action.payload.content;
-            state.content = action.payload.sent;
+        return {
+            ...state,
+            id: action.payload.id,
+            name: action.payload.name,
+            template: action.payload.template,
+            from: action.payload.from,
+            receivers: action.payload.receivers,
+            cname: action.payload.cname,
+            date: action.payload.date,
+            subject: action.payload.subject,
+            content: action.payload.content,
         }
+        },
+        clearMail: (state, action) => {
+            return {
+                ...state,
+                id: null,
+                name: '',
+                template: '',
+                from: 'Qmeter',
+                receivers: [],
+                cname: '',
+                date: 'Select date',
+                subject: '',
+                content: '',
+                sent: false
+            }
+        }
+
     }
 })
 
-export const {saveMail} = mailsSlice.actions
+export const {saveMail, clearMail} = mailsSlice.actions
 export default mailsSlice.reducer

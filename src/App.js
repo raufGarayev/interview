@@ -10,7 +10,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Campaigns />} />
-          <Route path='/mail' element={<MailForm />} />
+          <Route path='/mail/:id' element={<MailForm />} />
         </Routes>
         
       </Router>

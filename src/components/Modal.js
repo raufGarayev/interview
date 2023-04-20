@@ -1,30 +1,23 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import {useSelector } from 'react-redux';
 import { Modal, Button } from 'react-bootstrap'
-import { closeModal } from '../redux/slices/modalSlice';
 import './Modal.sass'
 
-const ModalWindow = () => {
-  const [show, setShow] = useState(false);
-  const dispatch = useDispatch()
+const ModalWindow = (props) => {
   const modal = useSelector(state => state.modal)
-
-  const handleClose = () => {
-    dispatch(closeModal())
-  };
 
   return (
     <>
-      <Modal show={modal.isOpen} onHide={handleClose}>
+      <Modal show={modal.isOpen} onHide={props.cancel}>
         <Modal.Header className='modal-header' closeButton>
         </Modal.Header>
-        <Modal.Body closeButton className='modal-body'>Are you sure you want to send this message?</Modal.Body>
+        <Modal.Body closeButton className='modal-body'>{props.message}</Modal.Body>
         <Modal.Footer>
-          <Button variant="success" onClick={handleClose}>
-            Send
+          <Button variant="success" onClick={props.confirm}>
+            {props.confirmButton}
           </Button>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
+          <Button variant="secondary" onClick={props.cancel}>
+            {props.cancelButton}
           </Button>
         </Modal.Footer>
       </Modal>
