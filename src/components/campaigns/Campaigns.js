@@ -1,12 +1,13 @@
 import React, {useState, useEffect} from 'react'
-import { Button, Table } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
-import {useSelector, useDispatch} from 'react-redux'
-import { clearMail, saveMail } from '../../redux/slices/mailsSlice'
-import './Campaigns.sass'
-import ModalWindow from '../Modal'
+import ModalWindow from '../modal/Modal'
+import { Link} from 'react-router-dom'
+import {useDispatch} from 'react-redux'
+import {saveMail } from '../../redux/slices/mailsSlice'
 import { closeModal, openModal } from '../../redux/slices/modalSlice'
+import { Button, Table } from 'react-bootstrap'
 import {AiOutlineSearch} from 'react-icons/ai'
+import debounce from 'lodash/debounce';
+import './Campaigns.sass'
 
 const Campaigns = () => {
     const [emails, setEmails] = useState([])
@@ -36,19 +37,15 @@ const Campaigns = () => {
             content: email.content,
             subject: email.subject,
             receivers: email.receivers,
+            type: email.type,
             sent: email.sent
         }))
     }
 
-    let timer
+    const debouncedSearch = debounce(setSearchQuery, 500);
     const handleSearch = e => {
-        clearTimeout(timer)
-
-        const newValue = e.target.value
-
-        timer = setTimeout(() => {
-            setSearchQuery(newValue)
-        }, 500)
+        const newValue = e.target.value;
+        debouncedSearch(newValue);
     }
 
     const handleDelete = email => {
@@ -72,7 +69,7 @@ const Campaigns = () => {
         <div className="campaigns-main">
             <div className="campaigns-main-top">
                 <div className="campaigns-main-top-inner">
-                    <input type="text" placeholder='search' onChange={(e) => handleSearch(e)} />
+                    <input type="text" placeholder='Search' onChange={(e) => handleSearch(e)} />
                     <AiOutlineSearch className='search-icon'/>
                 </div>
             </div>
@@ -92,9 +89,9 @@ const Campaigns = () => {
                         return (
                             <tr>
                                 <td>{i+1}</td>
-                                <td>{email.name}</td>
-                                <td>Email</td>
-                                <td>{new Date(email.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</td>
+                                <td>{email.name ? email.name : 'No name'}</td>
+                                <td>{email.type === 'email' ? 'Email' : 'SMS'}</td>
+                                <td>{isNaN(new Date(email.date).getTime()) ? "Not selected" : new Date(email.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</td>
                                 <td>
                                     <Link to={`/mail/${email.id}`}>
                                         <Button 

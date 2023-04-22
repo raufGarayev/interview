@@ -17,34 +17,34 @@
             flex-direction: column
             #receiver
                 position: relative
-                width: 49%
+                width: 49.5%
                 .to-container
                     min-width: 100%
                     display: flex
                     flex-direction: row
-                    justify-content: center
+                    justify-content: flex-start
                     align-items: center
                     border: 1px solid #cfcccc
                     border-radius: 5px
                     overflow-x: scroll
                     margin-top: 5px
                     #to
-                        flex: 1
+                        
                         border: 0
                         outline: none
-                        width: auto
+                        min-width: 80%
                         margin: 0
                     .test
                         flex: none
                         width: auto
-                        min-width: 100px
+                        
                         background: #f4f5f5
                         margin: 5px
                         padding: 5px 6px
                         border-radius: 3px
                         display: flex
                         align-items: center
-                        gap: 20px
+                        gap: 10px
                         flex-direction: row
                         height: 25px
                         font-size: 14px
@@ -94,7 +94,7 @@
             div
                 display: flex
                 flex-direction: column
-                width: 49%
+                width: 49.5%
             .select-wrapper
                 width: 100%
                 position: relative
@@ -114,9 +114,9 @@
             .cus-name
                 display: flex
                 flex-direction: column
-                width: 49%
+                width: 49.5%
             .date
-                width: 49%
+                width: 49.5%
                 input
                     width: 100%
         &-subject
@@ -143,7 +143,7 @@
         &-head
             border-bottom: 1px solid #f0f1f2
         &-main
-            &-customers, &-feedback
+            &-customers, &-feedback, &-smsbal, &-price
                 display: flex
                 justify-content: space-between
                 border-bottom: 1px solid #f0f1f2
@@ -213,6 +213,25 @@
 
 ::-webkit-scrollbar 
   display: none
+
+.nav-btn
+    position: absolute
+    top: 40px
+    right: 40px
+    background-color: #5cb85c !important
+    border: none !important
+    border-radius: 0 !important
+    &:hover, &:active, &:focus
+        background-color: #5cb85c !important
+        border: none
+
+.required::after
+  content: '*'
+  color: red
+
+.error
+    color: red
+    font-weight: 500
 
 
 

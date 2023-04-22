@@ -1,18 +1,39 @@
 import React from 'react'
-import {useParams, Link} from 'react-router-dom'
-import {useDispatch} from 'react-redux'
-import { clearMail } from '../../redux/slices/mailsSlice'
-import {Button} from 'react-bootstrap'
+import {Link} from 'react-router-dom'
+import {useDispatch, useSelector} from 'react-redux'
+import { Dropdown, DropdownButton } from 'react-bootstrap'
+import {saveMail } from '../../redux/slices/mailsSlice'
 
 const HeaderButton = () => {
-    const {id} = useParams()
-    const dispatch = useDispatch()
-    const handleNewMail = _ => {
-        dispatch(clearMail())
+  const urlId = useSelector(state => state.url.urlId)
+  const mail = useSelector(state => state.mail)
+  const dispatch = useDispatch()
+
+  const handleType = (type) => {
+    if(mail.id === null) {
+      dispatch(saveMail({
+        ...mail,
+        type: type
+      }))
     }
+  }
+
+
   return (
     <>
-        {id ? <Link to='/'>Back</Link> : <Link to={'/mail/0'}><Button onClick={handleNewMail} variant='success'>New Thread</Button></Link>}
+        {!urlId && (
+          <DropdownButton
+            key='down-centered'
+            id={`dropdown-button-drop-down-centered`}
+            drop='down-centered'
+            title="New thread"
+            bsPrefix='drp'
+          >
+            <Link onClick={() => handleType('email')} className='text-decoration-none drp-btn' to='/mail/0'>Email</Link>
+            <Dropdown.Divider />
+            <Link onClick={() => handleType('sms')} className='text-decoration-none drp-btn' to='/mail/0'>SMS</Link>
+          </DropdownButton>
+        )}
     </>
   )
 }
