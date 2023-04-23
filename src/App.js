@@ -4,8 +4,6 @@ import MailForm from './components/mailForm/MailForm';
 import Campaigns from './components/campaigns/Campaigns';
 import Header from './components/header/Header';
 
-
-
 function App() {
 
   return (

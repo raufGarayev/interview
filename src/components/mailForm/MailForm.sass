@@ -2,9 +2,9 @@
     width: 100%
     display: flex
     justify-content: space-between
-    padding: 20px
+    padding: 20px 10px
     &-main
-        width: 74%
+        width: 74.5%
         background: #fff
         height: 100%
         padding: 0 20px 10px 20px
@@ -29,15 +29,13 @@
                     overflow-x: scroll
                     margin-top: 5px
                     #to
-                        
                         border: 0
                         outline: none
                         min-width: 80%
                         margin: 0
-                    .test
+                    .input-tag
                         flex: none
                         width: auto
-                        
                         background: #f4f5f5
                         margin: 5px
                         padding: 5px 6px
@@ -76,15 +74,6 @@
             select
                 -webkit-appearance: none
                 appearance: none
-            textarea
-                margin-top: 5px
-                padding: 10px
-                outline: none
-                border-radius: 5px
-                border: 1px solid #cfcccc
-                &:focus
-                    outline: 1px solid #a6d6ff
-                    border: 1px solid #a6d6ff
 
         &-top, &-client
             width: 100%
@@ -112,13 +101,30 @@
             justify-content: space-between
             margin-top: 10px
             .cus-name
+                margin-top: 10px
                 display: flex
                 flex-direction: column
                 width: 49.5%
             .date
+                margin-top: 10px
                 width: 49.5%
-                input
+                display: flex
+                flex-direction: column
+                justify-content: center
+                .mydate
                     width: 100%
+                    margin-top: 5px
+                    outline: none
+                    border-radius: 5px
+                    border: 1px solid #cfcccc
+                    z-index: 0
+                    input
+                        border: none
+                        margin-top: 0
+                        
+                        &:focus
+                            outline: none
+                            border: none
         &-subject
             margin: 10px 0 20px 0
             div
@@ -129,11 +135,9 @@
             margin-top: 20px
             display: flex
             flex-direction: column
-            textarea
-                resize: none
     &-stats
         background: #fff
-        width: 24%
+        width: 24.5%
         height: 1%
         border-radius: 5px
         display: flex
@@ -218,12 +222,13 @@
     position: absolute
     top: 40px
     right: 40px
-    background-color: #5cb85c !important
-    border: none !important
-    border-radius: 0 !important
-    &:hover, &:active, &:focus
+    button
         background-color: #5cb85c !important
-        border: none
+        border: none !important
+        border-radius: 0 !important
+        &:hover, &:active, &:focus
+            background-color: #5cb85c !important
+            border: none
 
 .required::after
   content: '*'
@@ -232,7 +237,14 @@
 .error
     color: red
     font-weight: 500
+        
 
+.ql-container
+    height: 200px !important
+    .quill
+        margin-top: 10px !important
+.rs-picker-disabled
+    opacity: 1 !important 
 
 
 

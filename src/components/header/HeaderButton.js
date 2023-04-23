@@ -26,7 +26,7 @@ const HeaderButton = () => {
             key='down-centered'
             id={`dropdown-button-drop-down-centered`}
             drop='down-centered'
-            title="New thread"
+            title="NEW THREAD"
             bsPrefix='drp'
           >
             <Link onClick={() => handleType('email')} className='text-decoration-none drp-btn' to='/mail/0'>Email</Link>

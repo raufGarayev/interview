@@ -2,9 +2,6 @@ import React, {useState, useRef, useEffect} from 'react'
 import {AiOutlineClose} from 'react-icons/ai'
 import {FiCheck} from 'react-icons/fi'
 import {BsChatDots} from 'react-icons/bs'
-import Datetime from 'react-datetime';
-import './MailForm.sass'
-import "react-datetime/css/react-datetime.css";
 import ModalWindow from '../modal/Modal';
 import { useDispatch, useSelector } from 'react-redux';
 import { openModal, closeModal } from '../../redux/slices/modalSlice';
@@ -16,6 +13,9 @@ import { Button } from 'react-bootstrap';
 import { useForm} from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import ReactQuill from "react-quill";
+import { DatePicker } from 'rsuite';
+import './MailForm.sass'
 
 const customers = [
   {
@@ -41,7 +41,7 @@ const MailForm = () => {
   const schema = yup.object().shape({
     tname: yup.string().required('Thread name is required'),
     template: yup.string(),
-    date: yup.date().required("Enter valid date"),
+    date: yup.string().required("Enter valid date"),
     to: yup.string().email(),
     subject: yup.string().required('Subject is required'),
     content: yup.string().required('Content is required'),
@@ -62,6 +62,7 @@ const MailForm = () => {
   });
 
   const { register, handleSubmit, formState, getValues, watch, setValue } = form;
+  const frmValues = getValues()
   const { errors } = formState;
 
   const {id} = useParams()
@@ -121,7 +122,7 @@ const MailForm = () => {
 
   const receiversInput = () => {
     return inputValues?.map((r, index) => (
-      <div className='test' key={index}>
+      <div className='input-tag' key={index}>
         <p>{r.name}:{r.email}</p> 
         {!mail.sent && <AiOutlineClose className='del-icon' onClick={() => handleDelInput(index)} />}
       </div>
@@ -138,7 +139,8 @@ const MailForm = () => {
   }
 
   const handleDateChange = (e) => {
-    setValue("date", e._d)
+    setValue("date", e)
+    console.log(e)
   } 
 
   function handleInputKeyDown(event) {
@@ -241,9 +243,28 @@ const MailForm = () => {
     dispatch(saveMailToDB(false))
   }
 
+  const modules = {
+    toolbar: [
+      [{ 'header': '1'}, {'header': '2'}, {'font': []}],
+      [{size: []}],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{'list': 'ordered'}, {'list': 'bullet'}, 
+       {'indent': '-1'}, {'indent': '+1'}],
+      ['link', 'image', 'video'],
+      ['clean']
+    ]
+  };
+  
+  const formats = [
+    'header', 'font', 'size',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image', 'video'
+  ];
+
   return (
     <div className='mail-form'>
-      <Link to={'/'}><Button onClick={handleDrafting} className='nav-btn'>Back</Button></Link>
+      <Link className='nav-btn' to={'/'}><Button onClick={handleDrafting}>BACK</Button></Link>
       <div className="mail-form-main">
         <p>{mail.type === 'email' ? 'Email thread' : 'SMS thread'}</p>
         <div className="hr"></div>
@@ -252,7 +273,7 @@ const MailForm = () => {
             <div>
               <label htmlFor="tname" className="required">Thread name </label>
               <input type="text" id='tname' disabled={mail.sent} {...register("tname")} />
-              <p className="error">{errors.tname?.message}</p>
+              {errors.tname && <p className="error">{errors.tname.message}</p>}
             </div>
             <div>
               <label htmlFor="template">Template</label>
@@ -298,24 +319,29 @@ const MailForm = () => {
             </div>
             <div className='date'>
               <label htmlFor="date" className="required">Start sending </label>
-              <Datetime
-                value={ isNaN(new Date(mail.date).getTime()) ? "Select date" : new Date(mail.date).toLocaleString('en-GB', {
+              <DatePicker
+                format="dd-MM-yyyy HH:mm"
+                placeholder={isNaN(new Date(mail.date).getTime()) ? "Select date" : new Date(mail.date).toLocaleDateString('en-GB', {
                   day: '2-digit',
                   month: '2-digit',
                   year: 'numeric',
+                }).replace(/\//g, '-') + ' ' + new Date(mail.date).toLocaleTimeString('en-GB', {
                   hour: '2-digit',
                   minute: '2-digit',
-                  hour12: false
-                }).replace('/', '-').replace('/', '-')}
-                onChange={(value) => handleDateChange(value)}
-                input
-                dateFormat="DD-MM-YYYY"
-                timeFormat="HH:mm"
-                locale='en'
-                closeOnSelect
-                inputProps={{name: 'date', disabled: mail.sent}}
+                })}
+                ranges={[
+                  {
+                    label: 'Now',
+                    value: new Date()
+                  }
+                ]}
+                disabled={mail.sent}
+                {...register('date')}
+                onChange={value => handleDateChange(value)}
+                
+                className='mydate'
               />
-              <p className="error">{errors.date?.message}</p>
+              {errors.date && <p className="error">{errors.date.message}</p>}
             </div>
           </div>
           <div className="mail-form-main-subject">
@@ -327,11 +353,21 @@ const MailForm = () => {
           <div className="hr"></div>
           <div className="mail-form-main-textarea">
             <label htmlFor="content">Content</label>
-            <textarea cols="30" rows="10" {...register("content")} disabled={mail.sent}></textarea>
-            <p className="error">{errors.content?.message}</p>
+              <ReactQuill
+              name="content"
+              value={frmValues.content}
+              onChange={(value) => {
+                setValue("content", value)
+              }}
+              readOnly={mail.sent}
+              modules={modules}
+              formats={formats}
+            />
+            {errors.content && <p className="error">{errors.content.message}</p>}
           </div>
+          
           <div className="hrl"></div>
-          <button id='submit'>Send</button>
+          {!mail.sent && <button id='submit'>Send</button>}
         </form>
       </div>
       <div className="mail-form-stats">

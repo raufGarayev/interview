@@ -1,7 +1,7 @@
 import React from 'react';
 import {useSelector } from 'react-redux';
 import { Modal, Button } from 'react-bootstrap'
-import './Modal.sass'
+
 
 const ModalWindow = (props) => {
   const modal = useSelector(state => state.modal)
@@ -9,9 +9,9 @@ const ModalWindow = (props) => {
   return (
     <>
       <Modal show={modal.isOpen} onHide={props.cancel}>
-        <Modal.Header className='modal-header' closeButton>
+        <Modal.Header closeButton>
         </Modal.Header>
-        <Modal.Body closeButton className='modal-body'>{props.message}</Modal.Body>
+        <Modal.Body>{props.message}</Modal.Body>
         <Modal.Footer>
           <Button variant="success" onClick={props.confirm}>
             {props.confirmButton}
